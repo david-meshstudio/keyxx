@@ -1,5 +1,5 @@
 -module(qiniulib).
--export([upload/2,upload/1,uploadObj/1,uploadObj/2,uploadJson/1,uploadJson/2,download/1,downloadObj/1,downloadJson/1,delete/1,getDownloadURL/1,etag/1]).
+-export([upload/2,upload/1,uploadObj/1,uploadObj/2,uploadObjZipped/1,uploadObjZipped/2,uploadJson/1,uploadJson/2,download/1,downloadObj/1,downloadObjZipped/1,downloadJson/1,delete/1,getDownloadURL/1,etag/1]).
 -compile(export_all).
 -import(rfc4627,[encode/1,decode/1]).
 -define(AK,"SbWsVObx9qs_V1A92TlClwQjrK9oRPgPss3BAjJV").
@@ -31,6 +31,15 @@ uploadObj(Filename, Obj) ->
 	FileContent = base64:encode_to_string(term_to_binary(Obj)),
 	upload(Filename, FileContent).
 
+uploadObjZipped(Obj) ->
+	FileContent = base64:encode_to_string(term_to_binary(Obj)),
+	Filename = etag(binary_to_list(zlib:zip(FileContent))),
+	upload(Filename, FileContent).
+
+uploadObjZipped(Filename, Obj) ->
+	FileContent = base64:encode_to_string(term_to_binary(Obj)),
+	upload(Filename, binary_to_list(zlib:zip(FileContent))).
+
 upload(Filename, FileContent) ->
 	Bucket = ?DOMAIN,
 	inets:start(),
@@ -56,6 +65,10 @@ downloadJson(Filename) ->
 
 downloadObj(Filename) ->
 	FileContent = base64:decode(download(Filename)),
+	binary_to_term(FileContent).
+
+downloadObjZipped(Filename) ->
+	FileContent = base64:decode(binary_to_list(zlib:unzip(list_to_binary(download(Filename))))),
 	binary_to_term(FileContent).
 
 download(Filename) ->
