@@ -98,6 +98,7 @@ getRequestBody(Bucket, Filename, FileContent) ->
 getRequestBody(Bucket, Filename) ->
 	{ok, File} = file:open(Filename, [raw, read]),
 	{ok, FileContent} = file:read(File, filelib:file_size(Filename)),
+	file:close(File),
 	"--"++?BOUNDARY++"\r\nContent-Disposition: form-data; name=\"token\"\r\n\r\n"++getUploadToken(Bucket, Filename)++"\r\n--"++?BOUNDARY++"\r\nContent-Disposition: form-data; name=\"key\"\r\n\r\n"++Filename++"\r\n--"++?BOUNDARY++"\r\nContent-Disposition: form-data; name=\"file\"; filename=\""++Filename++"\"\r\nContent-Type: application/octet-stream\r\nContent-Transfer-Encoding: binary\r\n\r\n"++FileContent++"\r\n--"++?BOUNDARY++"--\r\n".
 
 getUploadToken(Bucket, Filename) ->
