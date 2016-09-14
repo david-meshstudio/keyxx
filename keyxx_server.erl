@@ -5,7 +5,7 @@ start() ->
 	inets:stop(),
 	application:ensure_started(inets),
 	inets:start(httpd, [
-		{modules, [mod_esi]},
+		{modules, [mod_esi,mod_get]},
 		{port, 8369},
 		{server_name, "keyxx"},
 		{document_root, "www"},
