@@ -1,4 +1,4 @@
--module(shaftstop_G_api).
+-module(keyxx_tool).
 -compile(export_all).
 -import(rfc4627, [encode/1,decode/1]).
 -define(PERIOD, 1000).
