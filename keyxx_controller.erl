@@ -8,10 +8,8 @@ do(SessionID, _Env, Input) ->
 	Header = ["Content-Type: text/plain; charset=utf-8\r\n\r\n"],
 	{ok, {obj, [{_, Command}, {_, Params}]}, []} = Data,
 	case binary_to_list(Command) of
-		"getBalance" ->
+		"echo" ->
 			Content = Params;
-		"test" ->
-			Content = "hi";
 		Other ->
 			Content = {"No such query", Other}
 	end,

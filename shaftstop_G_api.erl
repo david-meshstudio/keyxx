@@ -3,6 +3,7 @@
 -import(rfc4627, [encode/1,decode/1]).
 -define(PERIOD, 1000).
 -define(STEP, 1).
+-define(DIR, "E:\\GFDF\\").
 
 getGValue(UID, X, Y, I) ->
 	Xp = getValueInPeriod(X),
@@ -20,7 +21,7 @@ getGValue(UID, X, Y, I) ->
 	(Yp - Y0) / ?STEP * (Z1 - Z0) + Z0.
 
 getGFileValue(UID, Xi, Yi, I) ->
-	Filename = UID ++ "_" ++ I ++ ".gmd",
+	Filename = ?DIR ++ UID ++ "_" ++ I ++ ".gmd",
 	{ok, File} = file:open(Filename, [raw, read]),
 	{ok, FileContent} = file:pread(File, (Xi * ?PERIOD + Yi) * 4 * 8, 8),
 	file:close(File),
