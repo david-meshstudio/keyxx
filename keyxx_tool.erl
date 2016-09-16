@@ -5,6 +5,7 @@
 -define(STEP, 1).
 -define(DIR, "E:\\GFDF\\").
 
+% G Operation
 getGValue(UID, X, Y, I) ->
 	Xp = getValueInPeriod(X),
 	Yp = getValueInPeriod(Y),
@@ -37,3 +38,12 @@ getValueInPeriod(X) ->
 
 getIndex(X) ->
 	trunc(X / ?STEP).
+
+% H Function
+getH(X, Y, I) ->
+	if
+		X + Y > ?PERIOD ->
+			getH(X, Y - ?PERIOD, I);
+		true ->
+			X + Y + I
+	end.

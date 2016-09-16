@@ -1,5 +1,6 @@
 -module(polynomial).
 -export([sum/1,add/2,multi/2,subtract/2,mv_add/4,mv_subtract/4,mv_multi/5,remove_zerotail/1,bv_add/2,bv_subtract/2,bv_multi/2]).
+-compile(export_all).
 
 sum([H|T]) -> H + sum(T);
 sum([]) -> 0.
@@ -99,6 +100,14 @@ loop_find_maxpower(I, Len) ->
 
 get_maxpower(L) -> loop_find_maxpower(0, length(L)).
 
-bv_add(L1, L2) -> mv_add(L1, L2, 2, max(get_maxpower(L1), get_maxpower(L2))).
+bv_add(L1, L2) -> standardize(remove_zerotail(mv_add(L1, L2, 2, max(get_maxpower(L1), get_maxpower(L2))))).
 bv_subtract(L1, L2) -> bv_add(L1, multi2(-1, L2)).
-bv_multi(L1, L2) -> mv_multi(L1, L2, 2, get_maxpower(L1), get_maxpower(L2)).
+bv_multi(L1, L2) -> standardize(remove_zerotail(mv_multi(L1, L2, 2, get_maxpower(L1), get_maxpower(L2)))).
+
+standardize([]) ->
+	[];
+standardize([{H, _}|T]) ->
+	[H|standardize(T)].
+
+bv_recover_pow(L) ->
+	change(L, 2, get_maxpower(L)).
