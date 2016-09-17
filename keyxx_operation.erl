@@ -63,16 +63,16 @@ multi_withpower_single({H1, HP1}, [{H2, HP2}|T], UID) -> [{keyxx_tool:base_multi
 multi_withpower([], _, _) -> [];
 multi_withpower([{H1, HP1}|T1], L2, UID) -> multi_withpower_single({H1, HP1}, L2, UID) ++ multi_withpower(T1, L2, UID).
 
-merge_bypower_single({H1, HP1}, L, []) -> [[{H1, HP1}], L];
-merge_bypower_single({H1, HP1}, L, [{H2, HP2}|T]) when HP1 == HP2 -> merge_bypower_single({H1 + H2, HP1}, L, T);
-merge_bypower_single({H1, HP1}, L, [{H2, HP2}|T]) -> merge_bypower_single({H1, HP1}, L ++ [{H2, HP2}], T).
+merge_bypower_single({H1, HP1}, L, [], _) -> [[{H1, HP1}], L];
+merge_bypower_single({H1, HP1}, L, [{H2, HP2}|T], UID) when HP1 == HP2 -> merge_bypower_single({keyxx_tool:base_add(1, 1, H1, H2, UID), HP1}, L, T, UID);
+merge_bypower_single({H1, HP1}, L, [{H2, HP2}|T], UID) -> merge_bypower_single({H1, HP1}, L ++ [{H2, HP2}], T, UID).
 
-merge_bypower([{H, HP}|T]) ->
-	[L1, L2] = merge_bypower_single({H, HP}, [], T),
-	L1 ++ merge_bypower(L2);
-merge_bypower([]) -> [].
+merge_bypower([{H, HP}|T], UID) ->
+	[L1, L2] = merge_bypower_single({H, HP}, [], T, UID),
+	L1 ++ merge_bypower(L2, UID);
+merge_bypower([], _) -> [].
 
-mv_multi(L1, L2, N, M1, M2, UID) -> merge_bypower(multi_withpower(change(L1, N, M1), change(L2, N, M2), UID)).
+mv_multi(L1, L2, N, M1, M2, UID) -> merge_bypower(multi_withpower(change(L1, N, M1), change(L2, N, M2), UID), UID).
 
 get_zeropart(L1, L2, {H, HP}, [{H2, HP2}|T]) when H == 0 -> get_zeropart(L1, L2 ++ [{H, HP}], {H2, HP2}, T);
 get_zeropart(L1, L2, {H, HP}, [{H2, HP2}|T]) -> get_zeropart(L1 ++ L2 ++ [{H, HP}], [], {H2, HP2}, T);
