@@ -7,8 +7,8 @@
 
 % Base Operation
 base_add(P1, P2, C1, C2, UID) ->
-	[A1, X1, Y1] = C1,
-	[A2, X2, Y2] = C2,
+	[A1, X1, Y1|L] = C1,
+	[A2, X2, Y2|L] = C2,
 	U1 = getH(X1, Y2, 3),
 	U2 = getH(X2, Y1, 3),
 	U3 = getH(Y1, Y2, 5),
@@ -24,14 +24,14 @@ base_add(P1, P2, C1, C2, UID) ->
 	[A7 / A8, U5, U6].
 
 base_multiply(C1, C2, UID) ->
-	[A1, X1, Y1] = C1,
-	[A2, X2, Y2] = C2,
+	[A1, X1, Y1|L] = C1,
+	[A2, X2, Y2|L] = C2,
 	U1 = getH(X1, X2, 4),
 	U2 = getH(Y1, Y2, 5),
 	A3 = A1 * A2 * getGValue(UID, X1, X2, 4) / getGValue(UID, Y1, Y2, 5),
 	[A3, U1, U2].
 
-base_multiply_cp([A, X, Y], P) ->
+base_multiply_cp([A, X, Y|L], P) ->
 	[A * P, X, Y].
 
 % G Operation

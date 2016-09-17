@@ -99,6 +99,7 @@ get_maxpower(L) -> loop_find_maxpower(0, length(L)).
 bv_add(L1, L2, UID) -> standardize(remove_zerotail(mv_add(L1, L2, 2, max(get_maxpower(L1), get_maxpower(L2)), UID))).
 bv_subtract(L1, L2, UID) -> bv_add(L1, multi2(-1, L2, UID), UID).
 bv_multi(L1, L2, UID) -> standardize(remove_zerotail(mv_multi(L1, L2, 2, get_maxpower(L1), get_maxpower(L2), UID))).
+bv_multi_constant(P, [H|L]) -> [P * H|L].
 
 standardize([]) ->
 	[];
@@ -107,3 +108,8 @@ standardize([{H, _}|T]) ->
 
 bv_recover_pow(L) ->
 	change(L, 2, get_maxpower(L)).
+
+% Cipher = [[A1, X1, Y1], B1]
+% CipherF = [[A1, X1, Y1], B1] / [[A2, X2, Y2], B2]
+cipher_add(P1, P2, [L1, B1], [L2, B2], UID) ->
+	[bv_add(bv_multi_constant(P1, L1), bv_multi_constant(P2, L2),UID), P1 * B1 + P2 * B2].
