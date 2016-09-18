@@ -40,8 +40,8 @@ getGValue(UID, X, Y, I) ->
 	Yp = getValueInPeriod(Y),
 	X0 = getIndex(Xp),
 	Y0 = getIndex(Yp),
-	X1 = X0 + ?STEP,
-	Y1 = Y0 + ?STEP,
+	X1 = getValueInPeriod(X0 + ?STEP),
+	Y1 = getValueInPeriod(Y0 + ?STEP),
 	Z00 = getGFileValue(UID, X0, Y0, I),
 	Z01 = getGFileValue(UID, X0, Y1, I),
 	Z10 = getGFileValue(UID, X1, Y0, I),
@@ -71,7 +71,7 @@ getIndex(X) ->
 % H Function
 getH(X, Y, I) ->
 	if
-		X + Y > ?PERIOD ->
+		X + Y + I >= ?PERIOD ->
 			X + Y + I - ?PERIOD;
 		true ->
 			X + Y + I
