@@ -72,7 +72,7 @@ getIndex(X) ->
 getH(X, Y, I) ->
 	if
 		X + Y > ?PERIOD ->
-			getH(X, Y - ?PERIOD, I);
+			X + Y + I - ?PERIOD;
 		true ->
 			X + Y + I
 	end.

@@ -136,8 +136,8 @@ cipher_multiply([L1, B1], [L2, B2], UID) ->
 	Part2 = cipher_multiply_constant(B1, [L2, B2]),
 	Part3 = cipher_multiply_constant(B2, [L1, B1]),
 	Part4 = cipher_add(1, 1, Part1, Part2, UID),
-	[L, B] = cipher_add(1, 1, Part3, Part4, UID),
-	[L, B + B1 * B2].
+	[L, _] = cipher_add(1, 1, Part3, Part4, UID),
+	[L, B1 * B2].
 
 cipherF_add(P1, P2, [C11, C12], [C21, C22], UID) ->
 	[cipher_add(P1, P2, cipher_multiply(C11, C22, UID), cipher_multiply(C12, C21, UID), UID), cipher_multiply(C12, C22, UID)].
