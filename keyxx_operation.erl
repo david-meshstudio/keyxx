@@ -114,6 +114,9 @@ bv_recover_pow(L) ->
 cipher_add(P1, P2, [L1, B1], [L2, B2], UID) ->
 	[bv_add(bv_multi_constant(P1, L1), bv_multi_constant(P2, L2),UID), P1 * B1 + P2 * B2].
 
+cipher_subtract(P1, P2, [L1, B1], [L2, B2], UID) ->
+	cipher_add(P1, -1 * P2, [L1, B1], [L2, B2], UID).
+
 cipher_multiply_constant(P, [L, B]) ->
 	[bv_multi_constant(P, L), P * B].
 
@@ -127,8 +130,14 @@ cipher_multiply([L1, B1], [L2, B2], UID) ->
 cipherF_add(P1, P2, [C11, C12], [C21, C22], UID) ->
 	[cipher_add(P1, P2, cipher_multiply(C11, C22, UID), cipher_multiply(C12, C21, UID), UID), cipher_multiply(C12, C22, UID)].
 
+cipherF_subtract(P1, P2, [C11, C12], [C21, C22], UID) ->
+	cipherF_add(P1, -1 * P2, [C11, C12], [C21, C22], UID).
+
 cipherF_multiply_constant(P, [C1, C2]) ->
 	[cipher_multiply_constant(P, C1), C2].
 
 cipherF_multiply([C11, C12], [C21, C22], UID) ->
 	[cipher_multiply(C11, C21, UID), cipher_multiply(C12, C22, UID)].
+
+cipherF_divid([C11, C12], [C21, C22], UID) ->
+	[cipher_multiply(C11, C22, UID), cipher_multiply(C12, C21, UID)].
