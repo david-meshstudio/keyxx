@@ -44,12 +44,19 @@ reinpow([_|T], M) when T == [] -> [M];
 reinpow([_|T], M) -> [0|reinpow(T, M)].
 
 % Multi Variable
+blanklist(N) ->
+	if
+		N >= 0 ->
+			[0|blanklist(N - 1)];
+		true ->
+			[]
+	end.
 
-change(L, N, M) -> appendpow(L, fullpowlist(N, M)).
+change(L, N, M) -> appendpow(L, fullpowlist(N, M), N).
 
-appendpow([H|T], [HP|TP]) -> [{H,HP}|appendpow(T, TP)];
-appendpow(_, []) -> [];
-appendpow([], [HP|TP]) -> [{0,HP}|appendpow([], TP)].
+appendpow([H|T], [HP|TP], N) -> [{H,HP}|appendpow(T, TP, N)];
+appendpow(_, [], _) -> [];
+appendpow([], [HP|TP], N) -> [{blanklist(N),HP}|appendpow([], TP, N)].
 
 add_withpower([], [], _) -> [];
 add_withpower([{H1, HP1}|T1], [{H2, _}|T2], UID) -> [{keyxx_tool:base_add(1, 1, H1, H2, UID), HP1}|add_withpower(T1, T2, UID)].
@@ -99,7 +106,11 @@ get_maxpower(L) -> loop_find_maxpower(0, length(L)).
 bv_add(L1, L2, UID) -> standardize(remove_zerotail(mv_add(L1, L2, 2, max(get_maxpower(L1), get_maxpower(L2)), UID))).
 bv_subtract(L1, L2, UID) -> bv_add(L1, multi2(-1, L2, UID), UID).
 bv_multi(L1, L2, UID) -> standardize(remove_zerotail(mv_multi(L1, L2, 2, get_maxpower(L1), get_maxpower(L2), UID))).
-bv_multi_constant(P, [H|L]) -> [P * H|L].
+
+bv_multi_constant(_, []) ->
+	[];
+bv_multi_constant(P, [[H|HL]|L]) ->
+	[[P * H|HL]|bv_multi_constant(P,L)].
 
 standardize([]) ->
 	[];
@@ -121,11 +132,12 @@ cipher_multiply_constant(P, [L, B]) ->
 	[bv_multi_constant(P, L), P * B].
 
 cipher_multiply([L1, B1], [L2, B2], UID) ->
-	Part1 = bv_multi(L1, L2, UID),
+	Part1 = [bv_multi(L1, L2, UID), 0],
 	Part2 = cipher_multiply_constant(B1, [L2, B2]),
 	Part3 = cipher_multiply_constant(B2, [L1, B1]),
 	Part4 = cipher_add(1, 1, Part1, Part2, UID),
-	[cipher_add(1, 1, Part3, Part4, UID), B1 * B2].
+	[L, B] = cipher_add(1, 1, Part3, Part4, UID),
+	[L, B + B1 * B2].
 
 cipherF_add(P1, P2, [C11, C12], [C21, C22], UID) ->
 	[cipher_add(P1, P2, cipher_multiply(C11, C22, UID), cipher_multiply(C12, C21, UID), UID), cipher_multiply(C12, C22, UID)].
@@ -141,3 +153,12 @@ cipherF_multiply([C11, C12], [C21, C22], UID) ->
 
 cipherF_divid([C11, C12], [C21, C22], UID) ->
 	[cipher_multiply(C11, C22, UID), cipher_multiply(C12, C21, UID)].
+
+bv_recover_pow_result(L) ->
+	changeResult(L, 2, get_maxpower(L)).
+
+changeResult(L, N, M) -> appendpowResult(L, fullpowlist(N, M), N).
+
+appendpowResult([H|T], [HP|TP], N) -> [[H,HP]|appendpowResult(T, TP, N)];
+appendpowResult(_, [], _) -> [];
+appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)].

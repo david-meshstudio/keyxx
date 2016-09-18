@@ -51,7 +51,7 @@ getGValue(UID, X, Y, I) ->
 	(Yp - Y0) / ?STEP * (Z1 - Z0) + Z0.
 
 getGFileValue(UID, Xi, Yi, I) ->
-	Filename = ?DIR ++ UID ++ "_" ++ I ++ ".gmd",
+	Filename = ?DIR ++ UID ++ "_" ++ integer_to_list(I) ++ ".gmd",
 	{ok, File} = file:open(Filename, [raw, read]),
 	{ok, FileContent} = file:pread(File, (Xi * ?PERIOD + Yi) * 4 * 8, 8),
 	file:close(File),
