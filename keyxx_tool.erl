@@ -31,7 +31,7 @@ base_multiply(C1, C2, UID) ->
 	A3 = A1 * A2 * getGValue(UID, X1, X2, 4) / getGValue(UID, Y1, Y2, 5),
 	[A3, U1, U2].
 
-base_multiply_cp([A, X, Y|L], P) ->
+base_multiply_cp([A, X, Y|_], P) ->
 	[A * P, X, Y].
 
 % G Operation
