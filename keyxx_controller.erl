@@ -4,6 +4,7 @@
 
 do(SessionID, _Env, Input) ->
 	Data = decode(Input),
+	io:format("~p~n", [Data]),
 	Header = ["Content-Type: text/plain; charset=utf-8\r\n\r\n"],
 	{ok, {obj, [{_, Command}, {_, Params}]}, []} = Data,
 	case binary_to_list(Command) of
