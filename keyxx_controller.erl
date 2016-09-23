@@ -57,4 +57,5 @@ do(SessionID, _Env, Input) ->
 		Other ->
 			Content = {"No such query", Other}
 	end,
+	io:format("~p~n", [Content]),
 	mod_esi:deliver(SessionID, [Header, unicode:characters_to_binary(Content), ""]).
