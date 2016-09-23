@@ -162,3 +162,4 @@ changeResult(L, N, M) -> appendpowResult(L, fullpowlist(N, M), N).
 appendpowResult([H|T], [HP|TP], N) -> [[H,HP]|appendpowResult(T, TP, N)];
 appendpowResult(_, [], _) -> [];
 appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)].
+

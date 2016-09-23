@@ -24,16 +24,30 @@ do(SessionID, _Env, Input) ->
 			io:format("~p~n", [C1]),
 			io:format("~p~n", [C2]),
 			io:format("~p~n", [UID]),
+			[L, B] = keyxx_operation:cipher_add(P1, P2, C1, C2, binary_to_list(UID)),
+			Content = encode([keyxx_operation:bv_recover_pow_result(L), B]);
+		"multiply" ->
+			{ok, [C1, C2, UID], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C1]),
+			io:format("~p~n", [C2]),
+			io:format("~p~n", [UID]),
+			[L, B] = keyxx_operation:cipher_multiply(C1, C2, binary_to_list(UID)),
+			Content = encode([keyxx_operation:bv_recover_pow_result(L), B]);
+		"addF" ->
+			{ok, [P1, P2, C1, C2, UID], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C1]),
+			io:format("~p~n", [C2]),
+			io:format("~p~n", [UID]),
 			[[L1, B1], [L2, B2]] = keyxx_operation:cipherF_add(P1, P2, C1, C2, binary_to_list(UID)),
 			Content = encode([[keyxx_operation:bv_recover_pow_result(L1), B1], [keyxx_operation:bv_recover_pow_result(L2), B2]]);
-		"multiply" ->
+		"multiplyF" ->
 			{ok, [C1, C2, UID], _} = decode(binary_to_list(Params)),
 			io:format("~p~n", [C1]),
 			io:format("~p~n", [C2]),
 			io:format("~p~n", [UID]),
 			[[L1, B1], [L2, B2]] = keyxx_operation:cipherF_multiply(C1, C2, binary_to_list(UID)),
 			Content = encode([[keyxx_operation:bv_recover_pow_result(L1), B1], [keyxx_operation:bv_recover_pow_result(L2), B2]]);
-		"divid" ->
+		"dividF" ->
 			{ok, [C1, C2, UID], _} = decode(binary_to_list(Params)),
 			io:format("~p~n", [C1]),
 			io:format("~p~n", [C2]),
