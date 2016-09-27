@@ -120,39 +120,18 @@ standardize([{H, _}|T]) ->
 bv_recover_pow(L) ->
 	change(L, 2, get_maxpower(L)).
 
-% Cipher = [[A1, X1, Y1], B1]
-% CipherF = [[A1, X1, Y1], B1] / [[A2, X2, Y2], B2] = [[[A1, X1, Y1], B1],[[A2, X2, Y2], B2]]
-cipher_add(P1, P2, [L1, B1], [L2, B2], UID) ->
-	[bv_add(bv_multi_constant(P1, L1), bv_multi_constant(P2, L2), UID), P1 * B1 + P2 * B2].
+% Cipher = [[A1, X1, Y1],[A2, X2, Y2]]
+cipher_add(P1, P2, L1, L2, UID) ->
+	bv_add(bv_multi_constant(P1, L1), bv_multi_constant(P2, L2), UID).
 
-cipher_subtract(P1, P2, [L1, B1], [L2, B2], UID) ->
-	cipher_add(P1, -1 * P2, [L1, B1], [L2, B2], UID).
+cipher_subtract(P1, P2, L1, L2, UID) ->
+	cipher_add(P1, -1 * P2, L1, L2, UID).
 
-cipher_multiply_constant(P, [L, B]) ->
-	[bv_multi_constant(P, L), P * B].
+cipher_multiply_constant(P, L) ->
+	bv_multi_constant(P, L).
 
-cipher_multiply([L1, B1], [L2, B2], UID) ->
-	Part1 = [bv_multi(L1, L2, UID), 0],
-	Part2 = cipher_multiply_constant(B1, [L2, B2]),
-	Part3 = cipher_multiply_constant(B2, [L1, B1]),
-	Part4 = cipher_add(1, 1, Part1, Part2, UID),
-	[L, _] = cipher_add(1, 1, Part3, Part4, UID),
-	[L, B1 * B2].
-
-cipherF_add(P1, P2, [C11, C12], [C21, C22], UID) ->
-	[cipher_add(P1, P2, cipher_multiply(C11, C22, UID), cipher_multiply(C21, C12, UID), UID), cipher_multiply(C12, C22, UID)].
-
-cipherF_subtract(P1, P2, [C11, C12], [C21, C22], UID) ->
-	cipherF_add(P1, -1 * P2, [C11, C12], [C21, C22], UID).
-
-cipherF_multiply_constant(P, [C1, C2]) ->
-	[cipher_multiply_constant(P, C1), C2].
-
-cipherF_multiply([C11, C12], [C21, C22], UID) ->
-	[cipher_multiply(C11, C21, UID), cipher_multiply(C12, C22, UID)].
-
-cipherF_divid([C11, C12], [C21, C22], UID) ->
-	[cipher_multiply(C11, C22, UID), cipher_multiply(C12, C21, UID)].
+cipher_multiply(L1, L2, UID) ->
+	bv_multi(L1, L2, UID).
 
 bv_recover_pow_result(L) ->
 	changeResult(L, 2, get_maxpower(L)).
