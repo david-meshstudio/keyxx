@@ -117,6 +117,11 @@ standardize([]) ->
 standardize([{H, _}|T]) ->
 	[H|standardize(T)].
 
+standardizeList([]) ->
+	[];
+standardizeList([[H, _]|T]) ->
+	[H|standardizeList(T)].
+
 bv_recover_pow(L) ->
 	change(L, 2, get_maxpower(L)).
 
@@ -142,3 +147,81 @@ appendpowResult([H|T], [HP|TP], N) -> [[H,HP]|appendpowResult(T, TP, N)];
 appendpowResult(_, [], _) -> [];
 appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)].
 
+% exact division
+exact_divid(C, P, Range, C1, UID) ->
+	IsPositive = keyxx_compare:is_positive(C, Range, UID),
+	case IsPositive of
+		true ->
+			exact_divid(C, P, 0, Range, C1, UID, 0);
+		false ->
+			[Q, CM] = exact_divid(cipher_multiply_constant(-1, C), P, 0, Range, C1, UID, 0),
+			% io:format("CM = ~p~n", [CM]),			
+			% [- Q - 1, bv_recover_pow_result(cipher_subtract(P, 1, C1, standardizeList(CM), UID))];
+			[-Q, bv_recover_pow_result(cipher_multiply_constant(-1, standardizeList(CM)))];
+		unknown ->
+			exact_divid(C, P, 0, Range, C1, UID, 0)
+	end.
+
+exact_divid(C, P, Q, Range, C1, UID, HasUnknown) ->
+	IsPositive = keyxx_compare:is_positive(cipher_subtract(1, Q * P, C, C1, UID), Range, UID),
+	case IsPositive of
+		true ->
+			% io:format("Q = ~p~n", [Q]),
+			exact_divid_fast(C, P, Q + 16, Range, C1, UID, HasUnknown);
+		false ->
+			io:format("HU = ~p~n", [HasUnknown]),
+			if
+				HasUnknown > 0 ->
+					get_positive_remain(C, P, Q, 2, Range, C1, UID);
+				HasUnknown =:= 0 ->
+					[Q - 1, bv_recover_pow_result(cipher_subtract(1, (Q - 1) * P, C, C1, UID))]
+			end;			
+		unknown ->
+			% io:format("Q = ~p~n", [Q]),
+			exact_divid_slow(C, P, Q + 1, Range, C1, UID, HasUnknown + 1)
+	end.
+
+exact_divid_fast(C, P, Q, Range, C1, UID, HasUnknown) ->
+	IsPositive = keyxx_compare:is_positive(cipher_subtract(1, Q * P, C, C1, UID), Range, UID),
+	case IsPositive of
+		true ->
+			% io:format("Q = ~p~n", [Q]),
+			exact_divid_fast(C, P, Q + 16, Range, C1, UID, HasUnknown);
+		false ->
+			exact_divid_slow(C, P, Q - 15, Range, C1, UID, HasUnknown);			
+		unknown ->
+			% io:format("Q = ~p~n", [Q]),
+			exact_divid_slow(C, P, Q + 1, Range, C1, UID, HasUnknown + 1)
+	end.
+
+exact_divid_slow(C, P, Q, Range, C1, UID, HasUnknown) ->
+	IsPositive = keyxx_compare:is_positive(cipher_subtract(1, Q * P, C, C1, UID), Range, UID),
+	case IsPositive of
+		true ->
+			% io:format("Q = ~p~n", [Q]),
+			exact_divid_slow(C, P, Q + 1, Range, C1, UID, HasUnknown);
+		false ->
+			io:format("HU = ~p~n", [HasUnknown]),
+			if
+				HasUnknown > 0 ->
+					get_positive_remain(C, P, Q, 2, Range, C1, UID);
+				HasUnknown =:= 0 ->
+					[Q - 1, bv_recover_pow_result(cipher_subtract(1, (Q - 1) * P, C, C1, UID))]
+			end;			
+		unknown ->
+			% io:format("Q = ~p~n", [Q]),
+			exact_divid_slow(C, P, Q + 1, Range, C1, UID, HasUnknown + 1)
+	end.
+
+get_positive_remain(C, P, Q, N, Range, C1, UID) ->
+	C2 = cipher_subtract(1, (Q - N) * P, C, C1, UID),
+	IsPositive = keyxx_compare:is_positive(C2, Range, UID),
+	io:format("IP = ~p~n", [IsPositive]),
+	case IsPositive of
+		true ->
+			[Q - N, bv_recover_pow_result(C2)];
+		unknown ->
+			[Q - N, bv_recover_pow_result(C2)];
+		false ->
+			get_positive_remain(C, P, Q, N + 1, Range, C1, UID)
+	end.

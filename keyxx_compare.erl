@@ -17,10 +17,10 @@ is_positive(C, [X0, X1, Y0, Y1], UID) ->
 			[V01|_] = substitute_Z(CP, [X0, Y1], UID),
 			[V10|_] = substitute_Z(CP, [X1, Y0], UID),
 			[V11|_] = substitute_Z(CP, [X1, Y1], UID),
-			io:format("~p~n", [V00]),
-			io:format("~p~n", [V01]),
-			io:format("~p~n", [V10]),
-			io:format("~p~n", [V11]),
+			% io:format("~p~n", [V00]),
+			% io:format("~p~n", [V01]),
+			% io:format("~p~n", [V10]),
+			% io:format("~p~n", [V11]),
 			if
 				V00 > 0 , V01 > 0 , V10 > 0 , V11 > 0 ->
 					true;
