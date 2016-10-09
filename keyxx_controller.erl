@@ -41,6 +41,15 @@ do(SessionID, _Env, Input) ->
 			io:format("~p~n", [UID]),
 			L = keyxx_operation:cipher_multiply(C1, C2, binary_to_list(UID)),
 			Content = encode(keyxx_operation:bv_recover_pow_result(L));
+		"multiply16" ->
+			{ok, [C1, C2, FC0, FC1, UID], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C1]),
+			io:format("~p~n", [C2]),
+			io:format("~p~n", [FC0]),
+			io:format("~p~n", [FC1]),
+			io:format("~p~n", [UID]),
+			L = keyxx_byte_operation:cipher_multiply(C1, C2, FC0, FC1, binary_to_list(UID)),
+			Content = encode(keyxx_operation:bv_recover_pow_result(L));
 		"compare" ->
 			{ok, [C, X0, X1, Y0, Y1, UID], _} = decode(binary_to_list(Params)),
 			io:format("~p~n", [C]),
