@@ -1,6 +1,7 @@
 -module(keyxx_byte_operation).
 -compile(export_all).
 
+% Add
 cipher_add(P1, P2, C1, C2, FC0, FC1, UID) ->
 	Len = max(length(C1), length(C2)),
 	CS1 = standardize(C1, Len, FC0),
@@ -14,6 +15,7 @@ cipher_part_add(_, _, [], [], _) ->
 cipher_part_add(P1, P2, [Part1|CSL1], [Part2|CSL2], UID) ->
 	[keyxx_operation:cipher_add(P1, P2, Part1, Part2, UID)|cipher_part_add(P1, P2, CSL1, CSL2, UID)].
 
+% Multiply
 cipher_multiply(C1, C2, FC0, FC1, UID) ->
 	C3 = cipher_part_multiply(C1, C2, 0, FC1, UID, C1, C2, 0),
 	io:format("~p~n", [C3]),
@@ -61,6 +63,7 @@ cipher_part_multiply_merge([], FC0, _, _) ->
 cipher_part_multiply_merge([C1|L], FC0, FC1, UID) ->
 	remove_power(cipher_add(1, 1, C1, cipher_part_multiply_merge(L, FC0, FC1, UID), FC0, FC1, UID)).
 
+% Common
 bv_recover_pow_result([]) ->
 	[];
 bv_recover_pow_result([Part|CSL]) ->
