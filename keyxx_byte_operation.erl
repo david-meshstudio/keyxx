@@ -18,16 +18,16 @@ cipher_part_add(P1, P2, [Part1|CSL1], [Part2|CSL2], UID) ->
 % Multiply
 cipher_multiply(C1, C2, FC0, FC1, UID) ->
 	C3 = cipher_part_multiply(C1, C2, 0, FC1, UID, C1, C2, 0),
-	io:format("~p~n", [C3]),
+	% io:format("~p~n", [C3]),
 	CL = cipher_part_multiply_split(C3, 0, [], [], FC0),
-	io:format("~p~n", [CL]),
+	% io:format("~p~n", [CL]),
 	C4 = cipher_part_multiply_merge(CL, FC0, FC1, UID),
 	C4.
 
 cipher_part_multiply([], _, _, _, _, _, _, _) ->
 	[];
 cipher_part_multiply(C1, [], _, FC1, UID, C1b, C2b, Index) ->
-	io:format("~p~n", [Index]),
+	% io:format("~p~n", [Index]),
 	[_|CSL1] = C1,
 	cipher_part_multiply(CSL1, C2b, Index + 1, FC1, UID, C1b, C2b, Index);
 cipher_part_multiply(C1, C2, CP, FC1, UID, C1b, C2b, Index) ->
