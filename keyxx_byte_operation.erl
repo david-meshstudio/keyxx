@@ -65,13 +65,14 @@ standardize(C, Len, FC0) ->
 	case length(C) of
 		Len ->
 			C;
-		true ->
-			standardize([C|[FC0]], Len, FC0)
+		_ ->
+			standardize(lists:reverse([FC0|lists:reverse(C)]), Len, FC0)
 	end.
 
 simplify([], _, _, _) ->
 	[];
 simplify([P|CSL], Q, FC1, UID) ->
 	Range = [92, 93, 89, 90],
-	[Q, M] = keyxx_operation:exact_divid(keyxx_operation:cipher_add(1, 1, P, keyxx_operation:cipher_multiply_constant(Q, FC1), UID), 256, Range, FC1, UID),
-	[M|simplify(CSL, Q, FC1, UID)].
+	io:format("~p~n", [P]),
+	[Q1, M] = keyxx_operation:exact_divid(keyxx_operation:cipher_add(1, 1, P, keyxx_operation:cipher_multiply_constant(Q, FC1), UID), 256, Range, FC1, UID),
+	[M|simplify(CSL, Q1, FC1, UID)].
