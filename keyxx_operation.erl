@@ -147,6 +147,19 @@ appendpowResult([H|T], [HP|TP], N) -> [[H,HP]|appendpowResult(T, TP, N)];
 appendpowResult(_, [], _) -> [];
 appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)].
 
+% to binary
+to_binary(C, Range, C1, UID) ->
+	to_binary_part(C, 256, Range, C1, UID).
+
+to_binary_part(C, P, Range, C1, UID) ->
+	[Q, M] = exact_divid(C, P, Range, C1, UID),
+	if
+		P > 2 ->
+			[Q|to_binary_part(standardizeList(M), P / 2, Range, C1, UID)];
+		true ->
+			[Q, M]
+	end.
+
 % exact division
 exact_divid(C, P, Range, C1, UID) ->
 	IsPositive = keyxx_compare:is_positive(C, Range, UID),
@@ -169,7 +182,7 @@ exact_divid(C, P, Q, Range, C1, UID, HasUnknown) ->
 			% io:format("Q = ~p~n", [Q]),
 			exact_divid_fast(C, P, Q + 16, Range, C1, UID, HasUnknown);
 		false ->
-			io:format("HU = ~p~n", [HasUnknown]),
+			% io:format("HU = ~p~n", [HasUnknown]),
 			if
 				HasUnknown > 0 ->
 					get_positive_remain(C, P, Q, 2, Range, C1, UID);
@@ -201,7 +214,7 @@ exact_divid_slow(C, P, Q, Range, C1, UID, HasUnknown) ->
 			% io:format("Q = ~p~n", [Q]),
 			exact_divid_slow(C, P, Q + 1, Range, C1, UID, HasUnknown);
 		false ->
-			io:format("HU = ~p~n", [HasUnknown]),
+			% io:format("HU = ~p~n", [HasUnknown]),
 			if
 				HasUnknown > 0 ->
 					get_positive_remain(C, P, Q, 2, Range, C1, UID);
@@ -216,7 +229,7 @@ exact_divid_slow(C, P, Q, Range, C1, UID, HasUnknown) ->
 get_positive_remain(C, P, Q, N, Range, C1, UID) ->
 	C2 = cipher_subtract(1, (Q - N) * P, C, C1, UID),
 	IsPositive = keyxx_compare:is_positive(C2, Range, UID),
-	io:format("IP = ~p~n", [IsPositive]),
+	% io:format("IP = ~p~n", [IsPositive]),
 	case IsPositive of
 		true ->
 			[Q - N, bv_recover_pow_result(C2)];
