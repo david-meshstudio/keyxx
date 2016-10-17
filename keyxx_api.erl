@@ -6,3 +6,10 @@
 uploadG(ID,G) ->
 	GObj = encode(G),
 	uploadObjZipped(ID, GObj).
+
+downloadG(ID,Dir) ->
+	GObj = downloadObjZipped(ID),
+	File = Dir++"\\"++ID++".gmd",
+	{ok, S} = file:open(File, write),
+	file:write(File, GObj, [write]),
+	file:close(S).
