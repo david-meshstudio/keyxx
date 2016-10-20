@@ -76,6 +76,15 @@ cipher_simplify([], _) ->
 cipher_simplify([Part|CSL], UID) ->
 	[keyxx_operation:cipher_simplify2(Part, UID)|cipher_simplify(CSL, UID)].
 
+% Power
+cipher_power(C, N, FC0, FC1, UID) ->
+	if
+		N > 1 ->
+			cipher_multiply(1, C, cipher_power(C, N - 1, FC0, FC1, UID), FC0, FC1, UID);
+		true ->
+			C
+	end.
+
 % Common
 bv_recover_pow_result([]) ->
 	[];
