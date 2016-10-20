@@ -1,6 +1,19 @@
 -module(keyxx_controller).
 -import(rfc4627,[encode/1,decode/1]).
 -export([base/3,sdb/3,demo/3]).
+-define(KPL, 
+[[[[0,697,195],
+   [22.555651037969,108,600],
+   [101.075127136339,418,679]],
+  [2,0]],
+ [[[0,986,136],
+   [72.8961325864771,799,441],
+   [40.8786658795132,472,727]],
+  [1,1]],
+ [[[0,20,113],
+   [41.6295476976904,404,75],
+   [71.318706061555,546,100]],
+  [0,2]]]).
 
 base(SessionID, _Env, Input) ->
 	Data = decode(Input),
@@ -128,6 +141,12 @@ demo(SessionID, _Env, Input) ->
 			io:format("~p~n", [C1]),
 			io:format("~p~n", [UID]),
 			Content = encode(keyxx_operation:to_binary(C, [X0, X1, Y0, Y1], C1, binary_to_list(UID)));
+		"simplify" ->
+			{ok, [C, KPL, UID], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C]),
+			io:format("~p~n", [KPL]),
+			io:format("~p~n", [UID]),
+			Content = encode(keyxx_operation:cipher_simplify(keyxx_operation:bv_recover_pow_result(C), KPL, binary_to_list(UID)));
 		Other ->
 			Content = {"No such query", Other}
 	end,

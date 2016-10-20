@@ -147,6 +147,32 @@ appendpowResult([H|T], [HP|TP], N) -> [[H,HP]|appendpowResult(T, TP, N)];
 appendpowResult(_, [], _) -> [];
 appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)].
 
+% Simplify
+cipher_simplify(L, KPL, UID) ->
+	bv_recover_pow_result(standardize(merge_bypower(cipher_simplify_part(L, KPL, UID), UID))).
+
+cipher_simplify_part([], _, _) ->
+	[];
+cipher_simplify_part([[H1, HP1]|T1], KPL, UID) ->
+	H2 = find_same_power(KPL, HP1),
+	case H2 of
+		[] ->
+			[{H1, HP1}|cipher_simplify_part(T1, KPL, UID)];
+		[_, H21, H22] ->
+			[{keyxx_tool:base_multiply(H1, H21, UID), [0, 1]}, {keyxx_tool:base_multiply(H1, H22, UID), [1, 0]}|cipher_simplify_part(T1, KPL, UID)]
+	end.
+
+find_same_power([], _) ->
+	[];
+find_same_power([[H2, HP2]|T], HP) ->
+	% HP2L = tuple_to_list(HP2),
+	if
+		HP2 =:= HP ->
+			H2;
+		true ->
+			find_same_power(T, HP)
+	end.
+
 % to binary
 to_binary(C, Range, C1, UID) ->
 	to_binary_part(C, 256, Range, C1, UID).
