@@ -1,5 +1,18 @@
 -module(keyxx_operation).
 -compile(export_all).
+-define(KPL, 
+[[[[0,697,195],
+   [22.555651037969,108,600],
+   [101.075127136339,418,679]],
+  [2,0]],
+ [[[0,986,136],
+   [72.8961325864771,799,441],
+   [40.8786658795132,472,727]],
+  [1,1]],
+ [[[0,20,113],
+   [41.6295476976904,404,75],
+   [71.318706061555,546,100]],
+  [0,2]]]).
 
 add([], [], _) -> [];
 add([], [H|T], UID) -> [H|add([], T, UID)];
@@ -148,8 +161,11 @@ appendpowResult(_, [], _) -> [];
 appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)].
 
 % Simplify
-cipher_simplify(L, KPL, UID) ->
-	bv_recover_pow_result(standardize(merge_bypower(cipher_simplify_part(L, KPL, UID), UID))).
+cipher_simplify(L, UID) ->
+	bv_recover_pow_result(standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID))).
+
+cipher_simplify2(L, UID) ->
+	standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)).
 
 cipher_simplify_part([], _, _) ->
 	[];

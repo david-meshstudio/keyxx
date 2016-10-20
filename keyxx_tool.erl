@@ -86,3 +86,24 @@ getH(X, Y, I) ->
 		true ->
 			X + Y + I
 	end.
+
+% Tylor
+
+jc(N) ->
+	if
+		N > 0 ->
+			N * jc(N - 1);
+		true ->
+			1
+	end.
+
+ln_tylor(X) ->
+	ln_tylor(X - 1, 1).
+
+ln_tylor(X, N) ->
+	if
+		N < 100 ->
+			math:pow(-1, N + 1) * math:pow(X, N) / N + ln_tylor(X, N + 1);
+		true ->
+			0
+	end.
