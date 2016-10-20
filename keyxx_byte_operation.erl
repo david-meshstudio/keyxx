@@ -22,7 +22,7 @@ cipher_multiply(P, C1, C2, FC0, FC1, UID) ->
 	CL = cipher_part_multiply_split(C3, 0, [], [], FC0),
 	% io:format("~p~n", [CL]),
 	C4 = cipher_part_multiply_merge(CL, FC0, FC1, UID),
-	io:format("~p~n", [C4]),
+	% io:format("~p~n", [C4]),
 	[C51, C52, C53, C54|_] = cipher_simplify(C4, UID),
 	cipher_multiply_constant(P, [C51, C52, C53, C54]).
 

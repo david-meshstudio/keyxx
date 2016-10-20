@@ -28,11 +28,6 @@ base(SessionID, _Env, Input) ->
 			{ok, CV, _} = decode(base64:decode_to_string(binary_to_list(C))),
 			{ok, FC0V, _} = decode(base64:decode_to_string(binary_to_list(FC0))),
 			{ok, FC1V, _} = decode(base64:decode_to_string(binary_to_list(FC1))),
-			io:format("~p~n", [CV]),
-			io:format("~p~n", [N]),
-			io:format("~p~n", [FC0V]),
-			io:format("~p~n", [FC1V]),
-			io:format("~p~n", [UID]),
 			L = keyxx_byte_operation:cipher_power(keyxx_byte_operation:remove_power(CV), N, keyxx_operation:standardizeList(FC0V), keyxx_operation:standardizeList(FC1V), binary_to_list(UID)),
 			Content = base64:encode_to_string(encode(keyxx_byte_operation:bv_recover_pow_result(L)))
 	end,
