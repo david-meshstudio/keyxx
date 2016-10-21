@@ -1,6 +1,6 @@
 -module(keyxx_operation).
 -compile(export_all).
--define(KPL, 
+-define(KPL1, 
 [[[[0,697,195],
    [22.555651037969,108,600],
    [101.075127136339,418,679]],
@@ -13,6 +13,21 @@
    [41.6295476976904,404,75],
    [71.318706061555,546,100]],
   [0,2]]]).
+-define(KPL, 
+[[[[0,697,195],
+   [0.022555651037969,108,600],
+   [0.101075127136339,418,679]],
+  [2,0]],
+ [[[0,986,136],
+   [0.0728961325864771,799,441],
+   [0.0408786658795132,472,727]],
+  [1,1]],
+ [[[0,20,113],
+   [0.0416295476976904,404,75],
+   [0.071318706061555,546,100]],
+  [0,2]]]).
+-define(FC10000,[[0,651,221],[0.136806089497014010000,391,80],[-0.0992178268486624960000,835,37]]).
+% -define(FC10000,[[0,888,63],[3.87633926642827980000e-01,283,244],[1.06035369384874000000e+02,791,678]]).
 
 add([], [], _) -> [];
 add([], [H|T], UID) -> [H|add([], T, UID)];
@@ -162,10 +177,32 @@ appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)
 
 % Simplify
 cipher_simplify(L, UID) ->
-	bv_recover_pow_result(standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID))).
+	R = standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)),
+	% [_,[A1|_],[A2|_]|_] = R,
+	% % io:format("~p~n", [L]),
+	% if
+	% 	abs(A1) > 10000; abs(A2) > 10000 ->
+	% 		io:format("~p~n", [[A1,A2]]),
+	% 		cipher_simplify(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID);
+	% 	true ->
+	% 		bv_recover_pow_result(R)
+	% end.
+	bv_recover_pow_result(R).
 
 cipher_simplify2(L, UID) ->
-	standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)).
+	R = standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)),
+	% [_,[A1|_],[A2|_]|_] = R,
+	% % io:format("~p~n", [R]),
+	% if
+	% 	abs(A1) > 10000; abs(A2) > 10000 ->
+	% 		io:format("~p~n", [[A1,A2]]),
+	% 		R2 = cipher_simplify2(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID),
+	% 		io:format("~p~n", [R2]),
+	% 		R2;
+	% 	true ->
+	% 		R
+	% end.
+	R.
 
 cipher_simplify_part([], _, _) ->
 	[];
@@ -175,7 +212,7 @@ cipher_simplify_part([[H1, HP1]|T1], KPL, UID) ->
 		[] ->
 			[{H1, HP1}|cipher_simplify_part(T1, KPL, UID)];
 		[_, H21, H22] ->
-			[{keyxx_tool:base_multiply(H1, H21, UID), [0, 1]}, {keyxx_tool:base_multiply(H1, H22, UID), [1, 0]}|cipher_simplify_part(T1, KPL, UID)]
+			[{keyxx_tool:base_multiply(1000, H1, H21, UID), [0, 1]}, {keyxx_tool:base_multiply(1000, H1, H22, UID), [1, 0]}|cipher_simplify_part(T1, KPL, UID)]
 	end.
 
 find_same_power([], _) ->

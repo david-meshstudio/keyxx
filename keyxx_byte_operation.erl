@@ -7,8 +7,8 @@ cipher_add(P1, P2, C1, C2, FC0, FC1, UID) ->
 	CS1 = standardize(C1, Len, FC0),
 	CS2 = standardize(C2, Len, FC0),
 	C3 = cipher_part_add(P1, P2, CS1, CS2, UID),
-	% simplify(C3, 0, FC1, UID).
-	bv_recover_pow_result(C3).
+	byte_simplify(C3, 0, FC1, UID).
+	% bv_recover_pow_result(C3).
 
 cipher_part_add(_, _, [], [], _) ->
 	[];
@@ -17,6 +17,7 @@ cipher_part_add(P1, P2, [Part1|CSL1], [Part2|CSL2], UID) ->
 
 % Multiply
 cipher_multiply(P, C1, C2, FC0, FC1, UID) ->
+	% io:format("~p~n", [P]),
 	C3 = cipher_part_multiply(C1, C2, 0, FC1, UID, C1, C2, 0),
 	% io:format("~p~n", [C3]),
 	CL = cipher_part_multiply_split(C3, 0, [], [], FC0),
@@ -24,7 +25,9 @@ cipher_multiply(P, C1, C2, FC0, FC1, UID) ->
 	C4 = cipher_part_multiply_merge(CL, FC0, FC1, UID),
 	% io:format("~p~n", [C4]),
 	[C51, C52, C53, C54|_] = cipher_simplify(C4, UID),
-	cipher_multiply_constant(P, [C51, C52, C53, C54]).
+	C6 = cipher_multiply_constant(P, [C51, C52, C53, C54]),
+	io:format("~p~n", [C6]),
+	byte_simplify(C6, 0, FC1, UID).
 
 cipher_multiply_constant(_, []) ->
 	[];
@@ -104,9 +107,12 @@ remove_power([]) ->
 remove_power([P|L]) ->
 	[keyxx_operation:standardizeList(P)|remove_power(L)].
 
-byte_simplify([], _, _, _) ->
-	[];
+byte_simplify([], Q, FC1, UID) ->
+	Range = [92, 93, 89, 90],
+	[_, M] = keyxx_operation:exact_divid(keyxx_operation:cipher_multiply_constant(Q, FC1), 256, Range, FC1, UID),
+	[M];
 byte_simplify([P|CSL], Q, FC1, UID) ->
+	io:format("~p~n", [Q]),
 	Range = [92, 93, 89, 90],
 	[Q1, M] = keyxx_operation:exact_divid(keyxx_operation:cipher_add(1, 1, P, keyxx_operation:cipher_multiply_constant(Q, FC1), UID), 256, Range, FC1, UID),
 	[M|byte_simplify(CSL, Q1, FC1, UID)].

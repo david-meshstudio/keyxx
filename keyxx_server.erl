@@ -10,5 +10,6 @@ start() ->
 		{server_name, "keyxx"},
 		{document_root, "www"},
 		{server_root, "www"},
+		{erl_script_timeout, 18000},
 		{erl_script_alias, {"/api", [keyxx_controller]}}
 	]).

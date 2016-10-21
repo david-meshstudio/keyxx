@@ -9,13 +9,35 @@ jc(N) ->
 			1
 	end.
 
+exp_remain_p0(X) ->
+	0.0000006 * math:pow(X, 4) - 0.0008 * math:pow(X, 3) + 0.3658 * math:pow(X, 2) - 13.99 * X + 105.15.
+
+exp_remain_p1(X) ->
+	0.00000006 * math:pow(X, 5) - 0.00005 * math:pow(X, 4) + 0.0059 * math:pow(X, 3) - 0.1829 * math:pow(X, 2) + 3.0153 * X - 20.049.
+
+exp_remain_p2(X) ->
+	0.0000004 * math:pow(X, 4) - 0.0006 * math:pow(X, 3) + 0.2594 * math:pow(X, 2) + 4.6374 * X - 969.06.
+
+test_exp_tylor(X) ->
+	N = 20,
+	R = math:exp(X) - exp_tylor(X),
+	P = math:exp(math:log(R / math:pow(X, N + 1) * jc(N + 1)) / X * (N + 1)),
+	[R, P].
+	% R.
+
 exp_tylor(X) ->
 	exp_tylor(X, 0).
 
 exp_tylor(X,N) ->
 	if
-		N < 150 ->
+		N < 20 ->
 			math:pow(X, N) / jc(N) + exp_tylor(X, N + 1);
+		X < 9 ->
+			0;
+		% X >= 10, X < 100 ->
+		% 	math:pow(X, N + 1) / jc(N + 1) * math:exp(X / (N + 1) * math:log(exp_remain_p1(X)));
+		% X > 100 ->
+		% 	math:pow(X, N + 1) / jc(N + 1) * math:exp(X / (N + 1) * math:log(exp_remain_p2(X)))
 		true ->
 			0
 	end.

@@ -41,6 +41,18 @@ base_multiply(C1, C2, UID) ->
 			base_multiply_cp(C1, P)
 	end.	
 
+base_multiply(P1, C1, C2, UID) ->
+	[A1, X1, Y1|L] = C1,
+	case C2 of
+		[A2, X2, Y2|L] ->
+			U1 = getH(X1, X2, 4),
+			U2 = getH(Y1, Y2, 5),
+			A3 = P1 * A1 * A2 * getGValue(UID, X1, X2, 4) / getGValue(UID, Y1, Y2, 5),
+			[A3, U1, U2];
+		P when is_integer(P) ->
+			base_multiply_cp(C1, P * P1)
+	end.	
+
 base_multiply_cp([A, X, Y|_], P) ->
 	[A * P, X, Y].
 
