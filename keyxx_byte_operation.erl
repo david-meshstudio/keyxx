@@ -1,6 +1,6 @@
 -module(keyxx_byte_operation).
 -compile(export_all).
--define(Range, [92, 93, 89, 90]).
+-define(Range, [92.8, 93, 89.1, 89.3]).
 
 % Add
 cipher_add(P1, P2, C1, C2, FC0, FC1, UID) ->
@@ -32,8 +32,17 @@ cipher_multiply(P, C1, C2, FC0, FC1, UID) ->
 	% io:format("CL ~p~n", [CL]),
 	C4 = cipher_part_multiply_merge(CL, FC0, FC1, UID),
 	% io:format("C4 ~p~n", [C4]),
-	[C51, C52, C53, C54|_] = cipher_simplify(C4, UID),
-	C6 = cipher_multiply_constant(P, [C51, C52, C53, C54]),
+	% [C51, C52, C53, C54|_] = cipher_simplify(C4, UID),
+	% C6 = cipher_multiply_constant(P, [C51, C52, C53, C54]),
+	C5 = cipher_simplify(C4, UID),
+	Len = length(C5),
+	if
+		Len < 9 ->
+			C6 = cipher_multiply_constant(P, C5);
+		true ->
+			[C51, C52, C53, C54, C55, C56, C57, C58|_] = C5,
+			C6 = cipher_multiply_constant(P, [C51, C52, C53, C54, C55, C56, C57, C58])
+	end,
 	% io:format("C6 ~p~n", [C6]),
 	byte_simplify(C6, 0, FC1, UID).
 	% C6.
@@ -122,6 +131,6 @@ byte_simplify([], Q, FC1, UID) ->
 	% io:format("h1 ~p~n", [[Q1,M1]]),
 	[M1];
 byte_simplify([P|CSL], Q, FC1, UID) ->
-	io:format("~p~n", [Q]),
+	% io:format("~p~n", [Q]),
 	[Q1, M] = keyxx_operation:exact_divid(keyxx_operation:cipher_add(1, 1, P, keyxx_operation:cipher_multiply_constant(Q, FC1), UID), 256, ?Range, FC1, UID),
 	[M|byte_simplify(CSL, Q1, FC1, UID)].

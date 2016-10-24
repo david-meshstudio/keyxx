@@ -182,7 +182,7 @@ cipher_simplify(L, UID) ->
 	% io:format("~p~n", [L]),
 	if
 		abs(A1) > 10000; abs(A2) > 10000 ->
-			io:format("~p~n", [[A1,A2]]),
+			io:format("cs ~p~n", [[A1,A2]]),
 			cipher_simplify(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID);
 		true ->
 			bv_recover_pow_result(R)
@@ -195,7 +195,7 @@ cipher_simplify2(L, UID) ->
 	% io:format("~p~n", [R]),
 	if
 		abs(A1) > 10000; abs(A2) > 10000 ->
-			io:format("~p~n", [[A1,A2]]),
+			io:format("cs ~p~n", [[A1,A2]]),
 			R2 = cipher_simplify2(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID),
 			io:format("~p~n", [R2]),
 			R2;
