@@ -130,3 +130,14 @@ tan_tylor(X, N) ->
 		true ->
 			0
 	end.
+
+atan_tylor(X) ->
+	atan_tylor(X, 1).
+
+atan_tylor(X, N) ->
+	if
+		N < 10 ->
+			math:pow(-1, N - 1) * math:pow(X, 2 * N - 1) / (2 * N - 1) + atan_tylor(X, N + 1);
+		true ->
+			0
+	end.
