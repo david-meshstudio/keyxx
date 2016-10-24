@@ -178,31 +178,31 @@ appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)
 % Simplify
 cipher_simplify(L, UID) ->
 	R = standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)),
-	% [_,[A1|_],[A2|_]|_] = R,
-	% % io:format("~p~n", [L]),
-	% if
-	% 	abs(A1) > 10000; abs(A2) > 10000 ->
-	% 		io:format("~p~n", [[A1,A2]]),
-	% 		cipher_simplify(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID);
-	% 	true ->
-	% 		bv_recover_pow_result(R)
-	% end.
-	bv_recover_pow_result(R).
+	[_,[A1|_],[A2|_]|_] = R,
+	% io:format("~p~n", [L]),
+	if
+		abs(A1) > 10000; abs(A2) > 10000 ->
+			io:format("~p~n", [[A1,A2]]),
+			cipher_simplify(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID);
+		true ->
+			bv_recover_pow_result(R)
+	end.
+	% bv_recover_pow_result(R).
 
 cipher_simplify2(L, UID) ->
 	R = standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)),
-	% [_,[A1|_],[A2|_]|_] = R,
-	% % io:format("~p~n", [R]),
-	% if
-	% 	abs(A1) > 10000; abs(A2) > 10000 ->
-	% 		io:format("~p~n", [[A1,A2]]),
-	% 		R2 = cipher_simplify2(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID),
-	% 		io:format("~p~n", [R2]),
-	% 		R2;
-	% 	true ->
-	% 		R
-	% end.
-	R.
+	[_,[A1|_],[A2|_]|_] = R,
+	% io:format("~p~n", [R]),
+	if
+		abs(A1) > 10000; abs(A2) > 10000 ->
+			io:format("~p~n", [[A1,A2]]),
+			R2 = cipher_simplify2(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID),
+			io:format("~p~n", [R2]),
+			R2;
+		true ->
+			R
+	end.
+	% R.
 
 cipher_simplify_part([], _, _) ->
 	[];
@@ -249,7 +249,13 @@ exact_divid(C, P, Range, C1, UID) ->
 			[Q, CM] = exact_divid(cipher_multiply_constant(-1, C), P, 0, Range, C1, UID, 0),
 			% io:format("CM = ~p~n", [CM]),			
 			% [- Q - 1, bv_recover_pow_result(cipher_subtract(P, 1, C1, standardizeList(CM), UID))];
-			[-Q, bv_recover_pow_result(cipher_multiply_constant(-1, standardizeList(CM)))];
+			if
+				Q < 0 ->
+					io:format("here ~p~n", [Q]),			
+					[-Q, bv_recover_pow_result(cipher_multiply_constant(-1, standardizeList(CM)))];
+				true ->
+					[Q, CM]
+			end;
 		unknown ->
 			exact_divid(C, P, 0, Range, C1, UID, 0)
 	end.
@@ -266,7 +272,12 @@ exact_divid(C, P, Q, Range, C1, UID, HasUnknown) ->
 				HasUnknown > 0 ->
 					get_positive_remain(C, P, Q, 2, Range, C1, UID);
 				HasUnknown =:= 0 ->
-					[Q - 1, bv_recover_pow_result(cipher_subtract(1, (Q - 1) * P, C, C1, UID))]
+					if
+						Q > 0 ->
+							[Q - 1, bv_recover_pow_result(cipher_subtract(1, (Q - 1) * P, C, C1, UID))];
+						true ->
+							[Q, bv_recover_pow_result(cipher_subtract(1, Q * P, C, C1, UID))]
+					end					
 			end;			
 		unknown ->
 			% io:format("Q = ~p~n", [Q]),
@@ -298,7 +309,12 @@ exact_divid_slow(C, P, Q, Range, C1, UID, HasUnknown) ->
 				HasUnknown > 0 ->
 					get_positive_remain(C, P, Q, 2, Range, C1, UID);
 				HasUnknown =:= 0 ->
-					[Q - 1, bv_recover_pow_result(cipher_subtract(1, (Q - 1) * P, C, C1, UID))]
+					if
+						Q > 0 ->
+							[Q - 1, bv_recover_pow_result(cipher_subtract(1, (Q - 1) * P, C, C1, UID))];
+						true ->
+							[Q, bv_recover_pow_result(cipher_subtract(1, Q * P, C, C1, UID))]
+					end					
 			end;			
 		unknown ->
 			% io:format("Q = ~p~n", [Q]),
@@ -306,14 +322,19 @@ exact_divid_slow(C, P, Q, Range, C1, UID, HasUnknown) ->
 	end.
 
 get_positive_remain(C, P, Q, N, Range, C1, UID) ->
-	C2 = cipher_subtract(1, (Q - N) * P, C, C1, UID),
-	IsPositive = keyxx_compare:is_positive(C2, Range, UID),
-	% io:format("IP = ~p~n", [IsPositive]),
-	case IsPositive of
+	if
+		Q >= N ->
+			C2 = cipher_subtract(1, (Q - N) * P, C, C1, UID),
+			IsPositive = keyxx_compare:is_positive(C2, Range, UID),
+			% io:format("IP = ~p~n", [IsPositive]),
+			case IsPositive of
+				true ->
+					[Q - N, bv_recover_pow_result(C2)];
+				unknown ->
+					[Q - N, bv_recover_pow_result(C2)];
+				false ->
+					get_positive_remain(C, P, Q, N + 1, Range, C1, UID)
+			end;
 		true ->
-			[Q - N, bv_recover_pow_result(C2)];
-		unknown ->
-			[Q - N, bv_recover_pow_result(C2)];
-		false ->
-			get_positive_remain(C, P, Q, N + 1, Range, C1, UID)
+			get_positive_remain(C, P, Q, N - 1, Range, C1, UID)
 	end.
