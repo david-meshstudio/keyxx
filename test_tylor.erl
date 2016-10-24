@@ -84,3 +84,6 @@ mi_tylor(X, A, N) ->
 		true ->
 			0
 	end.
+
+gause(X) ->
+	X - (1 - 1/math:pi()*(math:pi()/2+math:atan(1/math:tan(math:pi()*X)))).
