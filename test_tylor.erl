@@ -65,13 +65,16 @@ ds_tylor(X, N) ->
 	end.
 
 c(A, N) ->
+	p(A, N) / jc(N).
+
+p(A, N) ->
 	if
 		N =:= 0 ->
 			1;
 		N =:= 1 ->
 			A;
 		true ->
-			(A - N + 1) * c(A, N - 1)
+			(A - N + 1) * p(A, N - 1)
 	end.
 
 mi_tylor(X, A) ->
@@ -80,10 +83,50 @@ mi_tylor(X, A) ->
 mi_tylor(X, A, N) ->
 	if
 		N < 100 ->
-			c(A, N) / jc(N) * math:pow(X, N) + mi_tylor(X, A, N + 1);
+			c(A, N) * math:pow(X, N) + mi_tylor(X, A, N + 1);
 		true ->
 			0
 	end.
 
 gause(X) ->
 	X - (1 - 1/math:pi()*(math:pi()/2+math:atan(1/math:tan(math:pi()*X)))).
+
+b(N) ->
+	b(N, N).
+
+b(M, N) ->
+	case M of
+		0 ->
+			1;
+		1 ->
+			-1/2;
+		_ ->
+			M1 = M / 2,
+			M2 = trunc(M / 2) / 1,
+			if
+				M1 =:= M2 ->
+					 - 1 / (N + 1) * bs(N, N - 1);
+				true ->
+					0
+			end			
+	end.
+
+bs(N, K) ->
+	if
+		K >=0 ->
+			c(N + 1, K) * b(K) + bs(N, K - 1);
+		true ->
+			0
+	end.
+
+tan_tylor(X) ->
+	tan_tylor(X, 1).
+
+tan_tylor(X, N) ->
+	% io:format("~p~n", [N]),
+	if
+		N < 10 ->
+			math:pow(-1, N - 1) * math:pow(2, 2 * N) * (math:pow(2, 2 * N) - 1) * b(2 * N) * math:pow(X, 2 * N - 1) / jc(2 * N) + tan_tylor(X, N + 1);
+		true ->
+			0
+	end.
