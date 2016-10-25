@@ -91,6 +91,9 @@ mi_tylor(X, A, N) ->
 gause(X) ->
 	X - (1 - 1/math:pi()*(math:pi()/2+math:atan(1/math:tan(math:pi()*X)))).
 
+gause2(X) ->
+	X - 1/math:pi()*(math:atan(math:tan(math:pi()*X))).
+
 b(N) ->
 	b(N, N).
 
@@ -126,18 +129,46 @@ tan_tylor(X, N) ->
 	% io:format("~p~n", [N]),
 	if
 		N < 10 ->
-			math:pow(-1, N - 1) * math:pow(2, 2 * N) * (math:pow(2, 2 * N) - 1) * b(2 * N) * math:pow(X, 2 * N - 1) / jc(2 * N) + tan_tylor(X, N + 1);
+			math:pow(-4, N) * (1 - math:pow(4, N)) * b(2 * N) * math:pow(X, 2 * N - 1) / jc(2 * N) + tan_tylor(X, N + 1);
 		true ->
 			0
 	end.
 
 atan_tylor(X) ->
-	atan_tylor(X, 1).
+	if
+		X < 1, X > -1 ->
+			atan_tylor(X, 0);
+		X > 1; X =:= 1 ->
+			math:pi() / 2 - 1 / X + atan_tylor2(X, 1);
+		X < -1; X =:= -1 ->
+			- math:pi() / 2 - 1 / X + atan_tylor2(X, 1)
+	end.
 
 atan_tylor(X, N) ->
 	if
 		N < 10 ->
-			math:pow(-1, N - 1) * math:pow(X, 2 * N - 1) / (2 * N - 1) + atan_tylor(X, N + 1);
+			math:pow(-1, N) * math:pow(X, 2 * N + 1) / (2 * N + 1) + atan_tylor(X, N + 1);
 		true ->
 			0
+	end.
+
+atan_tylor2(X, N) ->
+	if
+		N < 10 ->
+			math:pow(-1, N) / (math:pow(X, 2 * N + 1) * (2 * N + 1)) + atan_tylor2(X, N + 1);
+		true ->
+			0
+	end.
+
+gause_tylor(X) ->
+	gause_tylor(X, X).
+
+gause_tylor(X, Y) ->
+	if
+		Y < 0.5, Y >= -0.5 ->
+			X - 1/math:pi()*(atan_tylor(tan_tylor(math:pi()*Y)));
+		Y >= 0.5 ->
+			gause_tylor(X, Y - 1);
+		true ->
+			gause_tylor(X, Y + 1)
 	end.
