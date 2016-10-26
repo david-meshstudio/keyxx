@@ -56,6 +56,11 @@ base_multiply(P1, C1, C2, UID) ->
 base_multiply_cp([A, X, Y|_], P) ->
 	[A * P, X, Y].
 
+% Refine Accuracy
+% base_get_tormap([A, X, Y|_], UID, I) ->
+% 	Tor = getGTFileValue(UID, X, Y, I),
+% 	[A * Tor, A, Tor].
+
 % G Operation
 getGValue(UID, X, Y, I) ->
 	Xp = getValueInPeriod(X),
@@ -78,6 +83,17 @@ getGFileValue(UID, Xi, Yi, I) ->
 	{ok, FileContent} = file:pread(File, (Xi * ?PERIOD + Yi) * 4 * 8, 8),
 	file:close(File),
 	binary_to_term(list_to_binary([131,70|lists:reverse(FileContent)])).
+
+% GT Operation	
+getGTFileValue(UID, X, Y) ->
+	Filename = ?DIR ++ UID ++ "_gtor.gmd",
+	{ok, File} = file:open(Filename, [raw, read]),
+	{ok, FileContent1} = file:pread(File, (X * ?PERIOD + Y) * 2 * 8, 8),
+	{ok, FileContent2} = file:pread(File, (X * ?PERIOD + Y) * 2 * 8 + 8, 8),
+	% {ok, FileContent3} = file:pread(File, (X * ?PERIOD + Y) * 3 * 8 + 16, 8),
+	file:close(File),
+	% [binary_to_term(list_to_binary([131,70|lists:reverse(FileContent1)])),binary_to_term(list_to_binary([131,70|lists:reverse(FileContent2)])),binary_to_term(list_to_binary([131,70|lists:reverse(FileContent3)]))].
+	[binary_to_term(list_to_binary([131,70|lists:reverse(FileContent1)])),binary_to_term(list_to_binary([131,70|lists:reverse(FileContent2)]))].
 
 getValueInPeriod(X) ->
 	if

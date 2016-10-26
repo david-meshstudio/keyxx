@@ -1,6 +1,6 @@
 -module(keyxx_byte_operation).
 -compile(export_all).
--define(Range, [92.8, 93, 89.1, 89.3]).
+-define(Range, [92, 93, 89, 90]).
 
 % Add
 cipher_add(P1, P2, C1, C2, FC0, FC1, UID) ->
@@ -8,10 +8,13 @@ cipher_add(P1, P2, C1, C2, FC0, FC1, UID) ->
 	CS1 = standardize(C1, Len, FC0),
 	CS2 = standardize(C2, Len, FC0),
 	C3 = cipher_part_add(P1, P2, CS1, CS2, UID),
-	byte_simplify(C3, 0, FC1, UID).
-	% bv_recover_pow_result(C3).
+	% C4 = byte_simplify(C3, 0, FC1, UID),
+	% io:format("C4 ~p~n", [C4]),
+	C4 = bv_recover_pow_result(C3),
+	refine_accuracy(C4, UID).
+	% C4.
 
-cipher_add2(P1, P2, C1, C2, FC0, FC1, UID) ->
+cipher_add2(P1, P2, C1, C2, FC0, _, UID) ->
 	Len = max(length(C1), length(C2)),
 	CS1 = standardize(C1, Len, FC0),
 	CS2 = standardize(C2, Len, FC0),
@@ -44,8 +47,10 @@ cipher_multiply(P, C1, C2, FC0, FC1, UID) ->
 			C6 = cipher_multiply_constant(P, [C51, C52, C53, C54, C55, C56, C57, C58])
 	end,
 	% io:format("C6 ~p~n", [C6]),
-	byte_simplify(C6, 0, FC1, UID).
+	% C7 = byte_simplify(C6, 0, FC1, UID),
 	% C6.
+	C7 = bv_recover_pow_result(C6),
+	refine_accuracy(C7, UID).
 
 cipher_multiply_constant(_, []) ->
 	[];
@@ -134,3 +139,9 @@ byte_simplify([P|CSL], Q, FC1, UID) ->
 	% io:format("~p~n", [Q]),
 	[Q1, M] = keyxx_operation:exact_divid(keyxx_operation:cipher_add(1, 1, P, keyxx_operation:cipher_multiply_constant(Q, FC1), UID), 256, ?Range, FC1, UID),
 	[M|byte_simplify(CSL, Q1, FC1, UID)].
+
+% Refine Accuracy
+refine_accuracy([], _) ->
+	[];
+refine_accuracy([C|L], UID) ->
+	[keyxx_operation:refine_accuracy(C,  UID)|refine_accuracy(L, UID)].

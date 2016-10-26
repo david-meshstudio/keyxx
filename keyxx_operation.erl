@@ -178,31 +178,31 @@ appendpowResult([], [HP|TP], N) -> [[blanklist(N),HP]|appendpowResult([], TP, N)
 % Simplify
 cipher_simplify(L, UID) ->
 	R = standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)),
-	[_,[A1|_],[A2|_]|_] = R,
+	% [_,[A1|_],[A2|_]|_] = R,
 	% io:format("~p~n", [L]),
-	if
-		abs(A1) > 10000; abs(A2) > 10000 ->
-			io:format("cs ~p~n", [[A1,A2]]),
-			cipher_simplify(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID);
-		true ->
-			bv_recover_pow_result(R)
-	end.
-	% bv_recover_pow_result(R).
+	% if
+	% 	abs(A1) > 10000; abs(A2) > 10000 ->
+	% 		% io:format("cs ~p~n", [[A1,A2]]),
+	% 		cipher_simplify(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID);
+	% 	true ->
+	% 		bv_recover_pow_result(R)
+	% end.
+	bv_recover_pow_result(R).
 
 cipher_simplify2(L, UID) ->
 	R = standardize(merge_bypower(cipher_simplify_part(bv_recover_pow_result(L), ?KPL, UID), UID)),
-	[_,[A1|_],[A2|_]|_] = R,
+	% [_,[A1|_],[A2|_]|_] = R,
 	% io:format("~p~n", [R]),
-	if
-		abs(A1) > 10000; abs(A2) > 10000 ->
-			io:format("cs ~p~n", [[A1,A2]]),
-			R2 = cipher_simplify2(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID),
-			io:format("~p~n", [R2]),
-			R2;
-		true ->
-			R
-	end.
-	% R.
+	% if
+	% 	abs(A1) > 10000; abs(A2) > 10000 ->
+	% 		% io:format("cs ~p~n", [[A1,A2]]),
+	% 		R2 = cipher_simplify2(cipher_multiply(cipher_multiply_constant(0.0001, R), ?FC10000, UID), UID),
+	% 		io:format("~p~n", [R2]),
+	% 		R2;
+	% 	true ->
+	% 		R
+	% end.
+	R.
 
 cipher_simplify_part([], _, _) ->
 	[];
@@ -338,3 +338,37 @@ get_positive_remain(C, P, Q, N, Range, C1, UID) ->
 		true ->
 			get_positive_remain(C, P, Q, N - 1, Range, C1, UID)
 	end.
+
+% refine accuracy
+refine_accuracy(C, UID) ->
+	AT = get_tormap(C, UID),
+	[[SUMATor, _, _]|_] = lists:reverse(AT),
+	SUMATorZ = round(SUMATor),
+	io:format("~p~n", [AT]),
+	io:format("~p~n", [SUMATorZ - SUMATor]),
+	AList = get_refine_alist(AT, SUMATorZ, 0),
+	io:format("~p~n", [AList]),
+	change_refince_alist(C, AList).
+
+get_tormap([_,[[A1, X1, Y1],_],[[A2, X2, Y2]|_]], UID) ->
+	[Tor1,_] = keyxx_tool:getGTFileValue(UID, X1, Y1),
+	[_,Tor2] = keyxx_tool:getGTFileValue(UID, X2, Y2),
+	% [_,_,Tor] = keyxx_tool:getGTFileValue(UID, X1, X2),
+	% Tor = 1,
+	% [[0, 0, 0],[A1 * Tor1 * Tor, A1, Tor1 * Tor],[(A1 * Tor1 + A2 * Tor2) * Tor, A2, Tor2 * Tor]].
+	[[0, 0, 0],[A1 * Tor1, A1, Tor1],[A1 * Tor1 + A2 * Tor2, A2, Tor2]].
+	% [ATor, A, Tor] = keyxx_tool:base_get_tormap(H, UID, I),
+	% [[SUMATor + ATor, A, Tor]|get_tormap(L, UID, SUMATor + ATor, I + 1)].
+
+get_refine_alist([[_, A, Tor]|L], SUMATorZ, AccumulateATor) ->
+	case L of
+		[] ->
+			[(SUMATorZ - AccumulateATor) / Tor];
+		_ ->
+			[A|get_refine_alist(L, SUMATorZ, AccumulateATor + A * Tor)]
+	end.
+
+change_refince_alist([], _) ->
+	[];
+change_refince_alist([[[_, X, Y|_],HP]|L], [A|AL]) ->
+	[[[A, X, Y],HP]|change_refince_alist(L, AL)].
