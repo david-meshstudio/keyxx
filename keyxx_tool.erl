@@ -135,3 +135,19 @@ ln_tylor(X, N) ->
 		true ->
 			0
 	end.
+
+test_h() ->
+	print_test_h(0, 0).
+
+print_test_h(A, X) ->
+	H = math:atan(A * math:tan(X)),
+	D = math:tan(H) - A * math:tan(X),
+	io:format("~p~n", [[A, X, H, D]]),
+	if
+		A < 10 ->
+			print_test_h(A + 1, X);
+		X < 10 ->
+			print_test_h(0, X + 1);
+		true ->
+			io:format("over, ")
+	end.
