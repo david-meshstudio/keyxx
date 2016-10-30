@@ -146,7 +146,7 @@ atan_tylor(X) ->
 
 atan_tylor(X, N) ->
 	if
-		N < 10 ->
+		N < 3 ->
 			math:pow(-1, N) * math:pow(X, 2 * N + 1) / (2 * N + 1) + atan_tylor(X, N + 1);
 		true ->
 			0
@@ -154,7 +154,7 @@ atan_tylor(X, N) ->
 
 atan_tylor2(X, N) ->
 	if
-		N < 10 ->
+		N < 3 ->
 			math:pow(-1, N) / (math:pow(X, 2 * N + 1) * (2 * N + 1)) + atan_tylor2(X, N + 1);
 		true ->
 			0
@@ -166,7 +166,7 @@ gause_tylor(X) ->
 gause_tylor(X, Y) ->
 	if
 		Y < 0.5, Y >= -0.5 ->
-			X - 1/math:pi()*(atan_tylor(tan_tylor(math:pi()*Y)));
+			1/math:pi()*(atan_tylor(math:tan(math:pi()*Y)));
 		Y >= 0.5 ->
 			gause_tylor(X, Y - 1);
 		true ->
