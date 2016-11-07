@@ -14,7 +14,9 @@ base(SessionID, _Env, Input) ->
 			{ok, C2V, _} = decode(base64:decode_to_string(binary_to_list(C2))),
 			{ok, FC0V, _} = decode(base64:decode_to_string(binary_to_list(FC0))),
 			{ok, FC1V, _} = decode(base64:decode_to_string(binary_to_list(FC1))),
-			Content = base64:encode_to_string(encode(keyxx_byte_operation:cipher_add(P1, P2, keyxx_byte_operation:remove_power(C1V), keyxx_byte_operation:remove_power(C2V), keyxx_operation:standardizeList(FC0V), keyxx_operation:standardizeList(FC1V), binary_to_list(UID))));
+			L = keyxx_byte_operation:cipher_add(P1, P2, keyxx_byte_operation:remove_power(C1V), keyxx_byte_operation:remove_power(C2V), keyxx_operation:standardizeList(FC0V), keyxx_operation:standardizeList(FC1V), binary_to_list(UID)),
+			io:format("~p~n", [L]),
+			Content = base64:encode_to_string(encode(L));
 		"multiply" ->
 			{ok, [P, C1, C2, FC0, FC1, UID], _} = decode(binary_to_list(Params)),
 			{ok, C1V, _} = decode(base64:decode_to_string(binary_to_list(C1))),
@@ -23,6 +25,7 @@ base(SessionID, _Env, Input) ->
 			{ok, FC1V, _} = decode(base64:decode_to_string(binary_to_list(FC1))),
 			L = keyxx_byte_operation:cipher_multiply(P, keyxx_byte_operation:remove_power(C1V), keyxx_byte_operation:remove_power(C2V), keyxx_operation:standardizeList(FC0V), keyxx_operation:standardizeList(FC1V), binary_to_list(UID)),
 			% Content = base64:encode_to_string(encode(keyxx_byte_operation:bv_recover_pow_result(L)));
+			io:format("~p~n", [L]),
 			Content = base64:encode_to_string(encode(L));
 		"power" ->
 			{ok, [C, N, FC0, FC1, UID], _} = decode(binary_to_list(Params)),
