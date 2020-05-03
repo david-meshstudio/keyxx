@@ -140,6 +140,7 @@ bv_multi(L1, L2, UID) -> standardize(remove_zerotail(mv_multi(L1, L2, 2, get_max
 bv_multi_constant(_, []) ->
 	[];
 bv_multi_constant(P, [[H|HL]|L]) ->
+	% io:format("~p~n", [P]),
 	[[P * H|HL]|bv_multi_constant(P, L)].
 
 standardize([]) ->
@@ -159,6 +160,10 @@ bv_recover_pow(L) ->
 cipher_add(P1, P2, L1, L2, UID) ->
 	bv_add(bv_multi_constant(P1, L1), bv_multi_constant(P2, L2), UID).
 
+cipher_add2(P1, P2, L1, L2, UID1, UID2) ->
+	L3 = keyxx_operation:cipher_transform(L1, UID1, UID2),
+	bv_add(bv_multi_constant(P1, L3), bv_multi_constant(P2, L2), UID2).
+
 cipher_subtract(P1, P2, L1, L2, UID) ->
 	cipher_add(P1, -1 * P2, L1, L2, UID).
 
@@ -167,6 +172,10 @@ cipher_multiply_constant(P, L) ->
 
 cipher_multiply(L1, L2, UID) ->
 	bv_multi(L1, L2, UID).
+
+cipher_multiply2(L1, L2, UID1, UID2) ->
+	L3 = keyxx_operation:cipher_transform(L1, binary_to_list(UID1), binary_to_list(UID2)),
+	bv_multi(L3, L2, UID2).
 
 bv_recover_pow_result(L) ->
 	changeResult(L, 2, get_maxpower(L)).
@@ -376,3 +385,29 @@ change_refince_alist([], _) ->
 	[];
 change_refince_alist([[[_, X, Y|_],HP]|L], [A|AL]) ->
 	[[[A, X, Y],HP]|change_refince_alist(L, AL)].
+
+% Transform
+cipher_transform(L, UID1, UID2) ->
+	[A11, X11, Y11, A12, X12, Y12] = keyxx_tool:getZMapping(UID1),
+	[A21, X21, Y21, A22, X22, Y22] = keyxx_tool:getZMapping(UID2),
+	% io:format("~p~n", [L]),
+	% [_, [H11, HP1], [H21, HP2]|_] = bv_recover_pow_result(L),
+	[_, H11, H21] = L,
+	io:format("H11: ~p~n", [H11]),
+	% io:format("HP1: ~p~n", [HP1]),
+	% io:format("H21: ~p~n", [H21]),
+	% io:format("HP2: ~p~n", [HP2]),
+	io:format("AXY12: ~p,~p,~p~n", [A12, X12, Y12]),
+	H12 = keyxx_tool:base_multiply(H11, [A12, X12, Y12], UID1),
+	io:format("H12: ~p~n", [H12]),
+	io:format("AXY22: ~p,~p,~p~n", [A22, X22, Y22]),
+	H13 = keyxx_tool:base_split(H12, [A22, X22, Y22], UID1),
+	io:format("H13: ~p~n", [H13]),
+	io:format("H21: ~p~n", [H21]),
+	io:format("AXY11: ~p,~p,~p~n", [A11, X11, Y11]),
+	H22 = keyxx_tool:base_multiply(H21, [A11, X11, Y11], UID1),
+	io:format("H22: ~p~n", [H22]),
+	io:format("AXY21: ~p,~p,~p~n", [A21, X21, Y21]),
+	H23 = keyxx_tool:base_split(H22, [A21, X21, Y21], UID1),
+	io:format("H23: ~p~n", [H23]),
+	[[0, 0, 0], H13, H23].

@@ -3,7 +3,7 @@
 -import(rfc4627, [encode/1,decode/1]).
 -define(PERIOD, 1000).
 -define(STEP, 1).
--define(DIR, "E:\\GFDF\\").
+-define(DIR, "D:\\GFDF\\").
 
 % Base Operation
 base_add(P1, P2, C1, C2, UID) ->
@@ -35,7 +35,7 @@ base_multiply(C1, C2, UID) ->
 		[A2, X2, Y2|L] ->
 			U1 = getH(X1, X2, 4),
 			U2 = getH(Y1, Y2, 5),
-			A3 = A1 * A2 * getGValue(UID, X1, X2, 4) / getGValue(UID, Y1, Y2, 5),
+			A3 = A1 * A2 / getGValue(UID, Y1, Y2, 5) * getGValue(UID, X1, X2, 4),
 			[A3, U1, U2];
 		P when is_integer(P) ->
 			base_multiply_cp(C1, P)
@@ -56,10 +56,42 @@ base_multiply(P1, C1, C2, UID) ->
 base_multiply_cp([A, X, Y|_], P) ->
 	[A * P, X, Y].
 
+% Transform split F
+base_split(C1, C2, UID) ->
+	[A1, X1, Y1|L] = C1,
+	[A2, X2, Y2|L] = C2,
+	U1 = getHR(X2, X1, 4),
+	U2 = getHR(Y2, Y1, 5),
+	A3 = A1 / A2 * getGValue(UID, U2, Y2, 5) / getGValue(UID, U1, X2, 4),
+	[A3, U1, U2].
+
 % Refine Accuracy
 % base_get_tormap([A, X, Y|_], UID, I) ->
 % 	Tor = getGTFileValue(UID, X, Y, I),
 % 	[A * Tor, A, Tor].
+
+% Transform Z mapping
+getZMapping(UID) ->
+	% Filename = ?DIR ++ UID ++ "_" ++ "Z.gmd",
+	% {ok, File} = file:open(Filename, [raw, read]),
+	% {ok, A1} = file:pread(File, 0 * 8, 8),
+	% {ok, X1} = file:pread(File, 1 * 8, 8),
+	% {ok, Y1} = file:pread(File, 2 * 8, 8),
+	% {ok, A2} = file:pread(File, 3 * 8, 8),
+	% {ok, X2} = file:pread(File, 4 * 8, 8),
+	% {ok, Y2} = file:pread(File, 5 * 8, 8),
+	% file:close(File),
+	{ok, Ref} = dets:open_file(uidreg),
+	[{_, [A1, X1, Y1, A2, X2, Y2, _, _, _, _]}|_] = lists:reverse(dets:lookup(Ref, list_to_binary(UID))),
+	dets:close(Ref),
+	% [binary_to_term(list_to_binary([131,70|lists:reverse(A1)])), binary_to_term(list_to_binary([131,70|lists:reverse(X1)])), binary_to_term(list_to_binary([131,70|lists:reverse(Y1)])), binary_to_term(list_to_binary([131,70|lists:reverse(A2)])), binary_to_term(list_to_binary([131,70|lists:reverse(X2)])), binary_to_term(list_to_binary([131,70|lists:reverse(Y2)]))].
+	[A1, X1, Y1, A2, X2, Y2].
+
+getXRange(UID) ->
+	{ok, Ref} = dets:open_file(uidreg),
+	[{_, [_, _, _, _, _, _, XL, XH, YL, YH]}|_] = lists:reverse(dets:lookup(Ref, list_to_binary(UID))),
+	dets:close(Ref),
+	[XL, XH, YL, YH].
 
 % G Operation
 getGValue(UID, X, Y, I) ->
@@ -77,16 +109,19 @@ getGValue(UID, X, Y, I) ->
 	Z1 = (Xp - X0) / ?STEP * (Z11 - Z01) + Z01,
 	(Yp - Y0) / ?STEP * (Z1 - Z0) + Z0.
 
-getGFileValue(UID, Xi, Yi, I) ->
-	Filename = ?DIR ++ UID ++ "_" ++ integer_to_list(I) ++ ".gmd",
+getGFileValue(_, Xi, Yi, I) ->
+	% Filename = ?DIR ++ UID ++ "_" ++ integer_to_list(I) ++ ".gmd",
+	Filename = ?DIR ++ "DF635683432243530954_" ++ integer_to_list(I) ++ ".gmd",
+	% io:format("~p~n", [Filename]),
 	{ok, File} = file:open(Filename, [raw, read]),
 	{ok, FileContent} = file:pread(File, (Xi * ?PERIOD + Yi) * 4 * 8, 8),
 	file:close(File),
 	binary_to_term(list_to_binary([131,70|lists:reverse(FileContent)])).
 
 % GT Operation	
-getGTFileValue(UID, X, Y) ->
-	Filename = ?DIR ++ UID ++ "_gtor.gmd",
+getGTFileValue(_, X, Y) ->
+	% Filename = ?DIR ++ UID ++ "_gtor.gmd",
+	Filename = ?DIR ++ "DF635683432243530954_gtor.gmd",
 	{ok, File} = file:open(Filename, [raw, read]),
 	{ok, FileContent1} = file:pread(File, (X * ?PERIOD + Y) * 2 * 8, 8),
 	{ok, FileContent2} = file:pread(File, (X * ?PERIOD + Y) * 2 * 8 + 8, 8),
@@ -113,6 +148,14 @@ getH(X, Y, I) ->
 			X + Y + I - ?PERIOD;
 		true ->
 			X + Y + I
+	end.
+
+getHR(X, Y, I) ->
+	if
+		Y - X - I < 0 ->
+			Y - X - I + ?PERIOD;
+		true ->
+			Y - X - I
 	end.
 
 % Tylor

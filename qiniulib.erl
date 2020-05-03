@@ -2,11 +2,13 @@
 -export([upload/2,upload/1,uploadObj/1,uploadObj/2,uploadObjZipped/1,uploadObjZipped/2,uploadJson/1,uploadJson/2,download/1,downloadObj/1,downloadObjZipped/1,downloadJson/1,delete/1,getDownloadURL/1,etag/1]).
 -compile(export_all).
 -import(rfc4627,[encode/1,decode/1]).
--define(AK,"SbWsVObx9qs_V1A92TlClwQjrK9oRPgPss3BAjJV").
--define(SK,"yzpctby_ZSeMgQOrq8IGne7rHsEwI7TWDeE30pdH").
--define(DOMAIN,"keyxx").
+% -define(AK,"SbWsVObx9qs_V1A92TlClwQjrK9oRPgPss3BAjJV").
+% -define(SK,"yzpctby_ZSeMgQOrq8IGne7rHsEwI7TWDeE30pdH").
+-define(AK,"mb750Tu1r8niUdhUwXnH9fWhiyOXMFxTZtySVTRk").
+-define(SK,"0OEvqvyCmu_PGSupm8vu_x0fMJWJzkn9_zMmGpzA").
+-define(DOMAIN,"meshstudio").
 -define(UHOST,"http://upload.qiniu.com/").
--define(DHOST,"http://oa8s6st6u.bkt.clouddn.com/").
+-define(DHOST,"http://pbqyqf4ov.bkt.clouddn.com").
 -define(AHOST,"http://rs.qiniu.com").
 -define(BOUNDARY,"|||").
 

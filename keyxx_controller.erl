@@ -85,6 +85,22 @@ demo(SessionID, _Env, Input) ->
 			io:format("~p~n", [UID]),
 			L = keyxx_operation:cipher_add(P1, P2, C1, C2, binary_to_list(UID)),
 			Content = encode(keyxx_operation:bv_recover_pow_result(L));
+		"add2" ->
+			{ok, [C1, C2, UID1, UID2], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C1]),
+			io:format("~p~n", [C2]),
+			io:format("~p~n", [UID1]),
+			io:format("~p~n", [UID2]),
+			L = keyxx_operation:cipher_add2(1, 1, C1, C2, binary_to_list(UID1), binary_to_list(UID2)),
+			Content = encode(keyxx_operation:bv_recover_pow_result(L));
+		"substract2" ->
+			{ok, [C1, C2, UID1, UID2], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C1]),
+			io:format("~p~n", [C2]),
+			io:format("~p~n", [UID1]),
+			io:format("~p~n", [UID2]),
+			L = keyxx_operation:cipher_add2(1, -1, C1, C2, binary_to_list(UID1), binary_to_list(UID2)),
+			Content = encode(keyxx_operation:bv_recover_pow_result(L));
 		"add16" ->
 			{ok, [P1, P2, C1, C2, FC0, FC1, UID], _} = decode(binary_to_list(Params)),
 			io:format("~p~n", [C1]),
@@ -99,6 +115,14 @@ demo(SessionID, _Env, Input) ->
 			io:format("~p~n", [C2]),
 			io:format("~p~n", [UID]),
 			L = keyxx_operation:cipher_multiply(C1, C2, binary_to_list(UID)),
+			Content = encode(keyxx_operation:bv_recover_pow_result(L));
+		"multiply2" ->
+			{ok, [C1, C2, UID1, UID2], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C1]),
+			io:format("~p~n", [C2]),
+			io:format("~p~n", [UID1]),
+			io:format("~p~n", [UID2]),
+			L = keyxx_operation:cipher_multiply2(C1, C2, binary_to_list(UID1), binary_to_list(UID2)),
 			Content = encode(keyxx_operation:bv_recover_pow_result(L));
 		"multiply16" ->
 			{ok, [C1, C2, FC0, FC1, UID], _} = decode(binary_to_list(Params)),
@@ -147,6 +171,35 @@ demo(SessionID, _Env, Input) ->
 			io:format("~p~n", [UID]),
 			% Content = encode(keyxx_operation:cipher_simplify(keyxx_operation:bv_recover_pow_result(C), KPL, binary_to_list(UID)));
 			Content = encode(keyxx_operation:cipher_simplify(C, binary_to_list(UID)));
+		"register" ->
+			{ok, [A1, X1, Y1, A2, X2, Y2, XL, XH, YL, YH, UID], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [A1]),
+			io:format("~p~n", [X1]),
+			io:format("~p~n", [Y1]),
+			io:format("~p~n", [A2]),
+			io:format("~p~n", [X2]),
+			io:format("~p~n", [Y2]),
+			io:format("~p,~p,~p,~p~n", [XL, XH, YL, YH]),
+			io:format("~p~n", [UID]),
+			{ok, Ref} = dets:open_file(uidreg),
+			dets:insert(Ref, {UID, [A1, X1, Y1, A2, X2, Y2, XL, XH, YL, YH]}),
+			Content = encode(dets:close(Ref));
+		"transform" ->
+			{ok, [C, UID1, UID2], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [C]),
+			io:format("~p~n", [UID1]),
+			io:format("~p~n", [UID2]),
+			L = keyxx_operation:cipher_transform(C, binary_to_list(UID1), binary_to_list(UID2)),
+			Content = encode(keyxx_operation:bv_recover_pow_result(L));
+		"from_to" ->
+			{ok, [L11, Tx, L21, UID1, UID2], _} = decode(binary_to_list(Params)),
+			io:format("~p~n", [L11]),
+			io:format("~p~n", [Tx]),
+			io:format("~p~n", [L21]),
+			io:format("~p~n", [UID1]),
+			io:format("~p~n", [UID2]),
+			[Stat, L12, L22] = myth_api:from_to(L11, Tx, L21, binary_to_list(UID1), binary_to_list(UID2)),
+			Content = encode([Stat, L12, L22]);
 		Other ->
 			Content = {"No such query", Other}
 	end,

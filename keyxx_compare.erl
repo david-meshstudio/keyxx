@@ -30,3 +30,19 @@ is_positive(C, [X0, X1, Y0, Y1], UID) ->
 					unknown
 			end			
 	end.
+
+is_larger(C1, C2, Range, UID) ->
+	[X0, X1, Y0, Y1] = Range,
+	% io:format("C1:~p~n", [C1]),
+	C = keyxx_operation:cipher_add(1, -1, C1, C2, UID),
+	% io:format("C:~p~n", [C]),
+	keyxx_compare:is_positive(C, [X0, X1, Y0, Y1], UID).
+
+is_same([], []) -> true;
+is_same([H1|T1], [H2|T2]) ->
+	if
+		H1 == H2 ->
+			is_same(T1, T2);
+		true ->
+			false
+	end.
